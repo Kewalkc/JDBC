@@ -1,0 +1,170 @@
+package railwayticketreservation;
+
+public class RailwayReservation {
+    private String passengerName;
+    private int passengerAge;
+    private String chosenSeat;
+    private  String typeOfReservation;
+    private double amountPaid;
+    private  boolean isSeniorCitizen =true;
+
+    public boolean RailwayReservation(String passengerName, int passengerAge, String chosenSeat, String typeOfReservation) {
+        this.passengerName = passengerName;
+        this.passengerAge = passengerAge;
+        this.chosenSeat = chosenSeat;
+        this.typeOfReservation = typeOfReservation;
+
+
+        if (passengerAge > 60) {
+            this.chosenSeat = "berth";
+            isSenior();
+            reservationType();
+        } else {
+            return false;
+        }
+
+    }
+    
+    public  int isSenior(boolean isSeniorCitizen){
+        int result = 0;
+        if(isSeniorCitizen){
+            result=1;
+        }
+        return result;
+    }
+    public  void reservationType(){
+        if((typeOfReservation=="AC")||(typeOfReservation=="ac")){
+            amountPaid =100;
+        }else
+            amountPaid=50;
+
+    }
+
+    public String getPassengerName() {
+        return passengerName;
+    }
+
+    public void setPassengerName(String passengerName) {
+        this.passengerName = passengerName;
+    }
+
+    public int getPassengerAge() {
+        return passengerAge;
+    }
+
+    public void setPassengerAge(int passengerAge) {
+        this.passengerAge = passengerAge;
+    }
+
+    public String getChosenSeat() {
+        return chosenSeat;
+    }
+
+    public void setChosenSeat(String chosenSeat) {
+        this.chosenSeat = chosenSeat;
+    }
+
+    public String getTypeOfReservation() {
+        return typeOfReservation;
+    }
+
+    public void setTypeOfReservation(String typeOfReservation) {
+        this.typeOfReservation = typeOfReservation;
+    }
+
+    public double getAmountPaid() {
+        return amountPaid;
+    }
+
+    public void setAmountPaid(double amountPaid) {
+        this.amountPaid = amountPaid;
+    }
+
+    public boolean isSeniorCitizen() {
+        return isSeniorCitizen;
+    }
+
+    public void setSeniorCitizen(boolean seniorCitizen) {
+        isSeniorCitizen = seniorCitizen;
+    }
+
+
+
+
+
+}
+
+
+
+package railwayticketreservation;
+
+import java.sql.*;
+import java.util.Scanner;
+
+public class PassengerMain {
+    public static void main(String[] args) {
+        RailwayReservation railwayReservation = new RailwayReservation();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("enter name of passenger");
+        String name = sc.next();
+        System.out.println("enter age");
+        int age = sc.nextInt();
+        System.out.println("enter passenger choosen sheat");
+        String choosenSeat = sc.next();
+        System.out.println("enter  type of reservation");
+        String reservationType = sc.next();
+
+        String url = "jdbc:mysql://localhost:3306/Dec11exam";
+        String username = "root";
+        String password = "password";
+        String query = "insert into railway_reservation(passenger_name, passenger_age, choosen_seat, reservation_type ,  is_senior_citizen, amount_paid) values(?,?,?,?,?,?)";
+        Statement statement = null;
+        PreparedStatement preparedStatement = null;
+        Connection connection = null;
+
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection(url, username, password);
+            System.out.println("connection Established");
+            statement = connection.createStatement();
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, name);
+            preparedStatement.setInt(2, age);
+            preparedStatement.setString(3, choosenSeat);
+            preparedStatement.setString(4, reservationType);
+            preparedStatement.setString(5, railwayReservation.getChosenSeat());
+            preparedStatement.setDouble(6, railwayReservation.getAmountPaid());
+            int noOfRows = preparedStatement.executeUpdate();
+            System.out.println("inserted rows" + noOfRows);
+
+
+        } catch (ClassNotFoundException e1) {
+            System.err.println("class not found:" + e1.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Sql exception::" + e.getMessage());
+        } catch (Exception e2) {
+            System.err.println("exception::" + e2.getMessage());
+            e2.printStackTrace();
+        } finally {
+            {
+                try {
+                    if (statement != null) {
+                        statement.close();
+                    }
+                    if (preparedStatement != null) {
+                        preparedStatement.close();
+                    }
+                    if (connection != null) {
+                        connection.close();
+                    }
+                    System.out.println("connection closed!!!");
+                } catch (SQLException e) {
+                    System.err.println("Error::" + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+}
